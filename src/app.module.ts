@@ -1,18 +1,22 @@
+import { CatsService } from './cats/cats.service';
+import { CatsController } from './cats/cats.controller';
 import { MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CatsModule } from './cats/cats.module';
 import * as mongoose from 'mongoose';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGODB_URI),
+    CatsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, CatsController],
+  providers: [AppService, CatsService],
 })
 export class AppModule implements NestModule {
   private readonly isDev = process.env.MODE === 'dev' ? true : false;
