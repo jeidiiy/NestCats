@@ -1,14 +1,23 @@
 import { AuthService } from 'src/auth/auth.service';
-import { CatRequestDto } from './dto/cats.request.dto';
-import { CatsService } from './cats.service';
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { CatRequestDto } from '../dto/cats.request.dto';
+import { CatsService } from '../services/cats.service';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ReadOnlyCatDto } from './dto/cats.dto';
+import { ReadOnlyCatDto } from '../dto/cats.dto';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
-import { Request } from 'express';
 import { LoginRequestDto } from 'src/auth/dto/login.request.dto';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
-import { Cat } from './cats.schema';
+import { Cat } from '../cats.schema';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from 'src/common/utils/multer.options';
 
 @Controller('cats')
 export class CatsController {
@@ -43,5 +52,16 @@ export class CatsController {
   @Post()
   async signup(@Body() body: CatRequestDto) {
     return await this.catsService.signup(body);
+  }
+
+  @ApiOperation({ summary: '파일 업로드' })
+  @UseInterceptors(FilesInterceptor('image', 10, multerOptions('cats')))
+  @UseGuards(JwtAuthGuard)
+  @Post('upload')
+  upload(
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @CurrentUser() cat: Cat,
+  ) {
+    return this.catsService.uploadImg(cat, files);
   }
 }

@@ -8,6 +8,17 @@ import { InjectModel } from '@nestjs/mongoose';
 export class CatsRepository {
   constructor(@InjectModel(Cat.name) private readonly catModel: Model<Cat>) {}
 
+  async findByIdAndUpdateImg(id: string, filename: string) {
+    const cat = await this.catModel.findById(id);
+
+    cat.imgUrl = `http://localhost:8000/media/${filename}`;
+
+    const newCat = await cat.save();
+
+    console.log(newCat);
+    return newCat.readOnlyData;
+  }
+
   async findByIdWithoutPassword(id: string): Promise<Cat | null> {
     const cat = this.catModel.findById(id).select('-password');
     return cat;
