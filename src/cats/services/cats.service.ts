@@ -13,6 +13,12 @@ export class CatsService {
     private readonly authService: AuthService,
   ) {}
 
+  async getAllCat() {
+    const allCat = await this.catsRepository.findAll();
+    const readOnlyCats = allCat.map((cat) => cat.readOnlyData);
+    return readOnlyCats;
+  }
+
   async uploadImg(cat: Cat, files: Express.Multer.File[]) {
     const filename = files[0].filename;
 

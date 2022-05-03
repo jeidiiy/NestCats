@@ -8,6 +8,10 @@ import { InjectModel } from '@nestjs/mongoose';
 export class CatsRepository {
   constructor(@InjectModel(Cat.name) private readonly catModel: Model<Cat>) {}
 
+  async findAll() {
+    return await this.catModel.find();
+  }
+
   async findByIdAndUpdateImg(id: string, filename: string) {
     const cat = await this.catModel.findById(id);
 
