@@ -1,15 +1,21 @@
 import { CatRequestDto } from './dto/cats.request.dto';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { HttpException, Injectable } from '@nestjs/common';
 import { Cat } from './cats.schema';
 import { InjectModel } from '@nestjs/mongoose';
-
+import * as mongoose from 'mongoose';
+import { CommentsSchema } from 'src/comments/comments.schema';
 @Injectable()
 export class CatsRepository {
   constructor(@InjectModel(Cat.name) private readonly catModel: Model<Cat>) {}
 
   async findAll() {
-    return await this.catModel.find();
+    const CommentsModel = mongoose.model('comments', CommentsSchema);
+    const result = await this.catModel
+      .find()
+      .populate('comments', CommentsModel);
+
+    return result;
   }
 
   async findByIdAndUpdateImg(id: string, filename: string) {
@@ -23,7 +29,9 @@ export class CatsRepository {
     return newCat.readOnlyData;
   }
 
-  async findByIdWithoutPassword(id: string): Promise<Cat | null> {
+  async findByIdWithoutPassword(
+    id: string | Types.ObjectId,
+  ): Promise<Cat | null> {
     const cat = this.catModel.findById(id).select('-password');
     return cat;
   }
